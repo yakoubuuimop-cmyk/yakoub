@@ -1,0 +1,21 @@
+name: RDP
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Download ngrok
+        run: |
+          Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+          Expand-Archive ngrok.zip -DestinationPath .
+          ./ngrok.exe authtoken 30rzsDDyToJWNLKZ5vcUvdnSMrb_5hg53kcohafbSCR7xkTmA
+
+      - name: Enable RDP
+        run: |
+          net user VBS VBS1234 /add
+          net localgroup administrators VBS /add
+          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          ./ngrok.exe tcp 3389
